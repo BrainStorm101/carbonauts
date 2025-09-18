@@ -1,6 +1,7 @@
 import React, {createContext, useContext, useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {generateDeviceKeypair, storeKeypair} from '../utils/crypto';
+import { Alert } from 'react-native';
 
 interface User {
   id: string;
@@ -57,17 +58,25 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) 
   const login = async (phone: string, otp: string) => {
     try {
       setIsLoading(true);
+  
+      console.log('💡 login() called with:', phone, otp);
+      console.log('💡 Expected OTP: 123456, Received OTP:', otp);
+      console.log('💡 OTP comparison result:', otp === '123456');
       
-      // Simulate OTP verification
+      // Remove debug alert that might be blocking
+      // Alert.alert('Debug login()', `phone: ${phone}, otp: ${otp}`);
+  
       if (otp !== '123456') {
+        console.log('❌ OTP validation failed');
+        Alert.alert('Login Failed', 'Invalid OTP entered. Please use: 123456');
         throw new Error('Invalid OTP');
       }
-
-      // Generate device keypair on first login
+      
+      console.log('✅ OTP validation passed');
+  
       const keypair = await generateDeviceKeypair();
       await storeKeypair(keypair);
-
-      // Create user object (in real app, fetch from backend)
+  
       const newUser: User = {
         id: `user_${Date.now()}`,
         name: '',
@@ -80,16 +89,22 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) 
         kycStatus: 'PENDING',
         deviceId: keypair.deviceId,
       };
-
+  
       await AsyncStorage.setItem('user', JSON.stringify(newUser));
       setUser(newUser);
+  
+      console.log('✅ Login successful, user created:', newUser);
+      Alert.alert('✅ Success', 'Logged in successfully!');
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('❌ Login error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      Alert.alert('❌ Login Error', errorMessage);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
+  
 
   const logout = async () => {
     try {

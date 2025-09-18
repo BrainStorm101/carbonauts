@@ -35,9 +35,9 @@ const App = () => {
   return (
     <PaperProvider>
       <AuthProvider>
-        <BlockchainProvider>
+        {/* <BlockchainProvider> */}
           <AppContent />
-        </BlockchainProvider>
+        {/* </BlockchainProvider> */}
       </AuthProvider>
     </PaperProvider>
   );

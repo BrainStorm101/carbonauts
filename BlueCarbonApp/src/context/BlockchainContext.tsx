@@ -1,5 +1,5 @@
 import React, {createContext, useContext, useState} from 'react';
-import {blockchainService} from '../services/blockchainService';
+// import {blockchainService} from '../services/blockchainService'; // Temporarily disabled
 
 interface Project {
   id: string;
@@ -87,8 +87,8 @@ export const BlockchainProvider: React.FC<{children: React.ReactNode}> = ({child
       const updatedProjects = [...projects, newProject];
       setProjects(updatedProjects);
 
-      // Sync to blockchain
-      await blockchainService.createProject(newProject);
+      // Sync to blockchain - temporarily disabled
+      // await blockchainService.createProject(newProject);
       
       return projectId;
     } catch (error) {
@@ -115,8 +115,8 @@ export const BlockchainProvider: React.FC<{children: React.ReactNode}> = ({child
       const updatedSubmissions = [...submissions, newSubmission];
       setSubmissions(updatedSubmissions);
 
-      // Sync to blockchain
-      await blockchainService.createSubmission(newSubmission);
+      // Sync to blockchain - temporarily disabled
+      // await blockchainService.createSubmission(newSubmission);
       
       return submissionId;
     } catch (error) {
@@ -130,7 +130,8 @@ export const BlockchainProvider: React.FC<{children: React.ReactNode}> = ({child
   const getProjectsByUser = async (userId: string): Promise<Project[]> => {
     try {
       setIsLoading(true);
-      const userProjects = await blockchainService.getProjectsByUser(userId);
+      // const userProjects = await blockchainService.getProjectsByUser(userId);
+      const userProjects = projects.filter(p => p.createdBy === userId);
       setProjects(userProjects);
       return userProjects;
     } catch (error) {
@@ -144,7 +145,8 @@ export const BlockchainProvider: React.FC<{children: React.ReactNode}> = ({child
   const getSubmissionsByUser = async (userId: string): Promise<Submission[]> => {
     try {
       setIsLoading(true);
-      const userSubmissions = await blockchainService.getSubmissionsByUser(userId);
+      // const userSubmissions = await blockchainService.getSubmissionsByUser(userId);
+      const userSubmissions = submissions.filter(s => s.farmerId === userId);
       setSubmissions(userSubmissions);
       return userSubmissions;
     } catch (error) {
@@ -158,7 +160,8 @@ export const BlockchainProvider: React.FC<{children: React.ReactNode}> = ({child
   const getCreditsByUser = async (userId: string): Promise<CarbonCredit[]> => {
     try {
       setIsLoading(true);
-      const userCredits = await blockchainService.getCreditsByUser(userId);
+      // const userCredits = await blockchainService.getCreditsByUser(userId);
+      const userCredits = carbonCredits.filter(c => c.ownerId === userId);
       setCarbonCredits(userCredits);
       return userCredits;
     } catch (error) {
@@ -172,7 +175,7 @@ export const BlockchainProvider: React.FC<{children: React.ReactNode}> = ({child
   const syncOfflineData = async (): Promise<void> => {
     try {
       setIsLoading(true);
-      await blockchainService.syncOfflineData();
+      // await blockchainService.syncOfflineData(); // Temporarily disabled
       // Refresh all data after sync
       // Implementation depends on current user
     } catch (error) {

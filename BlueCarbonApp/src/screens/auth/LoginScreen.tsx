@@ -36,21 +36,29 @@ const LoginScreen = () => {
   };
 
   const handleLogin = async () => {
+    console.log('🚀 handleLogin called - Metro connection test');
+    console.log('📱 Current OTP value:', otp);
+    console.log('📱 OTP length:', otp.length);
+    
     if (!otp || otp.length < 4) {
+      console.log('❌ OTP validation failed - too short');
       Alert.alert('Error', 'Please enter a valid OTP');
       return;
     }
-
+  
     try {
       setLoading(true);
+      console.log('🔐 Attempting login with phone:', phone, 'OTP:', otp);
       await login(phone, otp);
+      console.log('✅ Login completed successfully in handleLogin');
     } catch (error) {
-      Alert.alert('Error', 'Invalid OTP. Please try again.');
+      console.error('❌ Login failed in handleLogin:', error);
+      // Don't show generic error, let AuthContext handle the specific error message
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <KeyboardAvoidingView
       style={styles.container}

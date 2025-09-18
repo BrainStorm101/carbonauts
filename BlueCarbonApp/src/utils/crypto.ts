@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DeviceInfo from 'react-native-device-info';
-import CryptoJS from 'react-native-crypto-js';
+// import DeviceInfo from 'react-native-device-info';
+// import CryptoJS from 'react-native-crypto-js';
 
 interface DeviceKeypair {
   deviceId: string;
@@ -11,13 +11,14 @@ interface DeviceKeypair {
 
 export const generateDeviceKeypair = async (): Promise<DeviceKeypair> => {
   try {
-    const deviceId = await DeviceInfo.getUniqueId();
+    // Generate a simple device ID using timestamp and random values
+    const deviceId = `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const timestamp = Date.now().toString();
     
-    // Generate a simple keypair (in production, use proper cryptographic libraries)
+    // Generate a simple keypair using basic crypto (in production, use proper cryptographic libraries)
     const seed = `${deviceId}_${timestamp}`;
-    const privateKey = CryptoJS.SHA256(seed).toString();
-    const publicKey = CryptoJS.SHA256(privateKey + 'public').toString();
+    const privateKey = btoa(seed + '_private').replace(/[^a-zA-Z0-9]/g, '').substr(0, 64);
+    const publicKey = btoa(privateKey + '_public').replace(/[^a-zA-Z0-9]/g, '').substr(0, 64);
     
     return {
       deviceId,
@@ -58,7 +59,8 @@ export const signData = async (data: any): Promise<string> => {
     }
     
     const dataString = JSON.stringify(data);
-    const signature = CryptoJS.HmacSHA256(dataString, keypair.privateKey).toString();
+    // Simple signature using base64 encoding (in production, use proper HMAC)
+    const signature = btoa(`${dataString}_${keypair.privateKey}`).substr(0, 32);
     
     return signature;
   } catch (error) {
