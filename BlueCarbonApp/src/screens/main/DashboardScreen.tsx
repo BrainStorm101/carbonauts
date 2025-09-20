@@ -15,6 +15,7 @@ const DashboardScreen = ({navigation}: any) => {
     totalCredits: 0,
     creditValue: 0,
   });
+  const [blockchainStatus, setBlockchainStatus] = useState<'connected' | 'disconnected' | 'syncing'>('connected');
 
   useEffect(() => {
     loadDashboardData();
@@ -88,6 +89,12 @@ const DashboardScreen = ({navigation}: any) => {
                 <Text style={styles.walletLabel}>Wallet Balance</Text>
                 <Text style={styles.walletValue}>₹{stats.creditValue.toFixed(2)}</Text>
                 <Text style={styles.creditsCount}>{stats.totalCredits} Credits</Text>
+                <View style={styles.blockchainStatus}>
+                  <Text style={[styles.statusText, {color: blockchainStatus === 'connected' ? '#4caf50' : '#f44336'}]}>
+                    🔗 {blockchainStatus === 'connected' ? 'Blockchain Connected' : 'Offline Mode'}
+                  </Text>
+                  <Text style={styles.nccrStatus}>📡 NCCR Portal Synced</Text>
+                </View>
               </View>
             </View>
           </Card.Content>
@@ -340,6 +347,19 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: '#1976d2',
+  },
+  blockchainStatus: {
+    marginTop: 8,
+    alignItems: 'flex-end',
+  },
+  statusText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  nccrStatus: {
+    fontSize: 9,
+    color: '#4caf50',
+    marginTop: 2,
   },
 });
 

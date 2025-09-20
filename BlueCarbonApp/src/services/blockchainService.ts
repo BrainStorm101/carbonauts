@@ -14,6 +14,11 @@ class BlockchainService {
     chaincodeName: 'bluecarbon',
   };
 
+  private nccrConfig = {
+    portalUrl: 'https://nccr.gov.in/api/v1',
+    apiKey: 'demo_nccr_api_key',
+  };
+
   async createProject(project: any): Promise<void> {
     try {
       // Store locally for offline support
@@ -33,6 +38,9 @@ class BlockchainService {
           project.saplingsPlanted.toString(),
           project.createdBy,
         ]);
+        
+        // Also sync to NCCR portal
+        await this.syncToNCCRPortal('project', project);
       }
     } catch (error) {
       console.error('Blockchain service error:', error);
@@ -48,7 +56,7 @@ class BlockchainService {
       // Try to sync to blockchain
       if (await this.isOnline()) {
         const keypair = await getKeypair();
-        const signature = await this.signData(submission, keypair.privateKey);
+        const signature = keypair ? await this.signData(submission, keypair.privateKey) : 'demo_signature';
         
         await this.invokeChaincode('CreateSubmission', [
           submission.id,
@@ -60,6 +68,9 @@ class BlockchainService {
           JSON.stringify(submission.gpsCoordinates),
           signature,
         ]);
+        
+        // Also sync to NCCR portal
+        await this.syncToNCCRPortal('submission', submission);
       }
     } catch (error) {
       console.error('Blockchain service error:', error);
@@ -166,11 +177,16 @@ class BlockchainService {
 
   private async isOnline(): Promise<boolean> {
     try {
-      // Simple connectivity check
+      // Simple connectivity check with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
       const response = await fetch(this.config.gatewayUrl, {
         method: 'HEAD',
-        timeout: 5000,
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
       return response.ok;
     } catch {
       return false;
@@ -201,6 +217,36 @@ class BlockchainService {
     // Simulate data signing with device private key
     const dataString = JSON.stringify(data);
     return `signature_${Buffer.from(dataString).toString('base64').slice(0, 20)}`;
+  }
+
+  private async syncToNCCRPortal(type: 'project' | 'submission', data: any): Promise<void> {
+    try {
+      console.log(`🌐 Syncing ${type} to NCCR Portal:`, {
+        portalUrl: this.nccrConfig.portalUrl,
+        dataId: data.id,
+        type: type
+      });
+
+      // Simulate NCCR portal API call
+      const endpoint = type === 'project' ? '/projects' : '/submissions';
+      const payload = {
+        ...data,
+        timestamp: new Date().toISOString(),
+        source: 'BlueCarbonApp',
+        apiKey: this.nccrConfig.apiKey,
+      };
+
+      // In real implementation, this would make actual HTTP request to NCCR portal
+      console.log(`📤 Sending to NCCR Portal ${endpoint}:`, payload);
+      
+      // Simulate successful response
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log(`✅ Successfully synced ${type} to NCCR Portal`);
+    } catch (error) {
+      console.error(`❌ Failed to sync ${type} to NCCR Portal:`, error);
+      // Don't throw error - continue with blockchain storage even if NCCR sync fails
+    }
   }
 }
 

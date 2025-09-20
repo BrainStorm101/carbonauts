@@ -1,0 +1,162 @@
+name: Blue Carbon Registry CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-mobile:
+    name: Test Mobile App
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: BlueCarbonApp/package-lock.json
+    
+    - name: Install dependencies
+      run: |
+        cd BlueCarbonApp
+        npm ci
+    
+    - name: Run tests
+      run: |
+        cd BlueCarbonApp
+        npm test -- --watchAll=false
+    
+    - name: TypeScript check
+      run: |
+        cd BlueCarbonApp
+        npx tsc --noEmit
+
+  test-portal:
+    name: Test NCCR Portal
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: NCCRPortal/package-lock.json
+    
+    - name: Install dependencies
+      run: |
+        cd NCCRPortal
+        npm ci
+    
+    - name: Run tests
+      run: |
+        cd NCCRPortal
+        npm test -- --watchAll=false
+    
+    - name: Build portal
+      run: |
+        cd NCCRPortal
+        npm run build
+
+  test-blockchain:
+    name: Test Blockchain
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Test blockchain simulator
+      run: |
+        cd fabric-samples/test-network
+        timeout 30s node standalone-blockchain-simulator.js || true
+        
+    - name: Test blockchain API
+      run: |
+        cd fabric-samples/test-network
+        node standalone-blockchain-simulator.js &
+        sleep 10
+        curl -f http://localhost:7051/health || exit 1
+
+  build-mobile:
+    name: Build Mobile App
+    runs-on: ubuntu-latest
+    needs: test-mobile
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: BlueCarbonApp/package-lock.json
+    
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '11'
+    
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v2
+    
+    - name: Install dependencies
+      run: |
+        cd BlueCarbonApp
+        npm ci
+    
+    - name: Build Android APK
+      run: |
+        cd BlueCarbonApp/android
+        ./gradlew assembleDebug
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-debug.apk
+        path: BlueCarbonApp/android/app/build/outputs/apk/debug/app-debug.apk
+
+  deploy-portal:
+    name: Deploy NCCR Portal
+    runs-on: ubuntu-latest
+    needs: test-portal
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: NCCRPortal/package-lock.json
+    
+    - name: Install dependencies
+      run: |
+        cd NCCRPortal
+        npm ci
+    
+    - name: Build portal
+      run: |
+        cd NCCRPortal
+        npm run build
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./NCCRPortal/build

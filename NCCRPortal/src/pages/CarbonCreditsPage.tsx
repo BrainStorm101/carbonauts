@@ -367,7 +367,7 @@ const CarbonCreditsPage: React.FC = () => {
             fullWidth
             label="Price per Credit (₹)"
             type="number"
-            step="0.01"
+            inputProps={{ step: "0.01" }}
             value={mintForm.pricePerCredit}
             onChange={(e) => setMintForm({ ...mintForm, pricePerCredit: e.target.value })}
             sx={{ mb: 2 }}

@@ -1,0 +1,59 @@
+{
+  "name": "blue-carbon-registry",
+  "version": "1.0.0",
+  "description": "Blockchain-based Blue Carbon Registry system for mangrove restoration and carbon credit management",
+  "main": "index.js",
+  "scripts": {
+    "start": "node start-services.js",
+    "install-all": "npm run install:portal && npm run install:mobile",
+    "install:portal": "cd NCCRPortal && npm install",
+    "install:mobile": "cd BlueCarbonApp && npm install",
+    "start:blockchain": "cd fabric-samples/test-network && node standalone-blockchain-simulator.js",
+    "start:portal": "cd NCCRPortal && npm start",
+    "start:mobile": "cd BlueCarbonApp && npx react-native start",
+    "build:portal": "cd NCCRPortal && npm run build",
+    "build:mobile": "cd BlueCarbonApp && npx react-native run-android --variant=release",
+    "test": "npm run test:portal && npm run test:mobile",
+    "test:portal": "cd NCCRPortal && npm test -- --watchAll=false",
+    "test:mobile": "cd BlueCarbonApp && npm test -- --watchAll=false",
+    "lint": "npm run lint:portal && npm run lint:mobile",
+    "lint:portal": "cd NCCRPortal && npm run lint",
+    "lint:mobile": "cd BlueCarbonApp && npm run lint",
+    "deploy": "npm run build:portal && npm run build:mobile",
+    "monitor": "node monitor-services.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/blue-carbon-registry.git"
+  },
+  "keywords": [
+    "blockchain",
+    "blue-carbon",
+    "mangrove",
+    "carbon-credits",
+    "react-native",
+    "hyperledger-fabric",
+    "smart-india-hackathon",
+    "climate-change",
+    "sustainability",
+    "environmental-monitoring"
+  ],
+  "author": "Blue Carbon Registry Team",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourusername/blue-carbon-registry/issues"
+  },
+  "homepage": "https://github.com/yourusername/blue-carbon-registry#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3"
+  },
+  "workspaces": [
+    "NCCRPortal",
+    "BlueCarbonApp"
+  ]
+}

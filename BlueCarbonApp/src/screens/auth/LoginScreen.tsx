@@ -4,130 +4,64 @@ import {
   Text,
   StyleSheet,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import {TextInput, Button, Card, Title} from 'react-native-paper';
 import {useAuth} from '../../context/AuthContext';
 
 const LoginScreen = () => {
-  const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const {login, sendOTP} = useAuth();
-
-  const handleSendOTP = async () => {
-    if (!phone || phone.length < 10) {
-      Alert.alert('Error', 'Please enter a valid phone number');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await sendOTP(phone);
-      setOtpSent(true);
-      Alert.alert('Success', 'OTP sent to your phone number');
-    } catch (error) {
-      Alert.alert('Error', 'Failed to send OTP. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [email, setEmail] = useState('demo@bluecarbon.com');
+  const [password, setPassword] = useState('password123');
+  const [isLoading, setIsLoading] = useState(false);
+  const {login} = useAuth();
 
   const handleLogin = async () => {
-    console.log('🚀 handleLogin called - Metro connection test');
-    console.log('📱 Current OTP value:', otp);
-    console.log('📱 OTP length:', otp.length);
-    
-    if (!otp || otp.length < 4) {
-      console.log('❌ OTP validation failed - too short');
-      Alert.alert('Error', 'Please enter a valid OTP');
-      return;
-    }
-  
     try {
-      setLoading(true);
-      console.log('🔐 Attempting login with phone:', phone, 'OTP:', otp);
-      await login(phone, otp);
-      console.log('✅ Login completed successfully in handleLogin');
+      setIsLoading(true);
+      await login(email, password);
     } catch (error) {
-      console.error('❌ Login failed in handleLogin:', error);
-      // Don't show generic error, let AuthContext handle the specific error message
+      Alert.alert('Login Failed', 'Please try again');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
   
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <View style={styles.content}>
-        <Card style={styles.card}>
-          <Card.Content>
-            <Title style={styles.title}>🌊 Blue Carbon Registry</Title>
-            <Text style={styles.subtitle}>
-              Transparent Carbon Credit Trading Platform
-            </Text>
+    <View style={styles.container}>
+      <Card style={styles.card}>
+        <Card.Content>
+          <Title style={styles.title}>🌊 Blue Carbon Registry - EMAIL LOGIN</Title>
+          
+          <TextInput
+            label="Email"
+            value={email}
+            onChangeText={setEmail}
+            mode="outlined"
+            style={styles.input}
+          />
 
-            <TextInput
-              label="Phone Number"
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-              mode="outlined"
-              style={styles.input}
-              disabled={otpSent}
-              left={<TextInput.Icon icon="phone" />}
-            />
+          <TextInput
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            mode="outlined"
+            style={styles.input}
+          />
 
-            {!otpSent ? (
-              <Button
-                mode="contained"
-                onPress={handleSendOTP}
-                loading={loading}
-                style={styles.button}>
-                Send OTP
-              </Button>
-            ) : (
-              <>
-                <TextInput
-                  label="Enter OTP"
-                  value={otp}
-                  onChangeText={setOtp}
-                  keyboardType="numeric"
-                  mode="outlined"
-                  style={styles.input}
-                  maxLength={6}
-                  left={<TextInput.Icon icon="lock" />}
-                />
-                <Button
-                  mode="contained"
-                  onPress={handleLogin}
-                  loading={loading}
-                  style={styles.button}>
-                  Verify & Login
-                </Button>
-                <Button
-                  mode="text"
-                  onPress={() => {
-                    setOtpSent(false);
-                    setOtp('');
-                  }}
-                  style={styles.resendButton}>
-                  Change Phone Number
-                </Button>
-              </>
-            )}
+          <Button
+            mode="contained"
+            onPress={handleLogin}
+            loading={isLoading}
+            style={styles.button}>
+            Login
+          </Button>
 
-            <Text style={styles.demoText}>
-              Demo OTP: 123456
-            </Text>
-          </Card.Content>
-        </Card>
-      </View>
-    </KeyboardAvoidingView>
+          <Text style={styles.demoText}>
+            Demo: demo@bluecarbon.com / password123
+          </Text>
+        </Card.Content>
+      </Card>
+    </View>
   );
 };
 
@@ -135,9 +69,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#e3f2fd',
-  },
-  content: {
-    flex: 1,
     justifyContent: 'center',
     padding: 20,
   },
@@ -147,15 +78,9 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'center',
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#1976d2',
-    marginBottom: 8,
-  },
-  subtitle: {
-    textAlign: 'center',
-    fontSize: 14,
-    color: '#666',
     marginBottom: 24,
   },
   input: {
@@ -165,15 +90,11 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingVertical: 4,
   },
-  resendButton: {
-    marginTop: 8,
-  },
   demoText: {
     textAlign: 'center',
     fontSize: 12,
     color: '#999',
     marginTop: 16,
-    fontStyle: 'italic',
   },
 });
 
