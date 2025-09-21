@@ -1,0 +1,26 @@
+{
+  "name": "blue-carbon-registry",
+  "version": 2,
+  "builds": [
+    {
+      "src": "NCCRPortal/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "https://blue-carbon-blockchain.railway.app/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "NCCRPortal/$1"
+    }
+  ],
+  "env": {
+    "REACT_APP_BLOCKCHAIN_URL": "https://blue-carbon-blockchain.railway.app"
+  }
+}

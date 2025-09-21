@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # NCCR Portal (Web Interface)
+  nccr-portal:
+    build:
+      context: ./NCCRPortal
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_BLOCKCHAIN_URL=http://blockchain-api:7051
+    depends_on:
+      - blockchain-api
+    restart: unless-stopped
+
+  # Blockchain API Service
+  blockchain-api:
+    build:
+      context: ./fabric-samples/test-network
+      dockerfile: Dockerfile
+    ports:
+      - "7051:7051"
+    environment:
+      - NODE_ENV=production
+      - PORT=7051
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7051/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - nccr-portal
+      - blockchain-api
+    restart: unless-stopped
+
+  # Database for persistent storage
+  mongodb:
+    image: mongo:5.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=bluecarbon123
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:

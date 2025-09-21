@@ -1,0 +1,94 @@
+name: Deploy Blue Carbon Registry
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy-portal:
+    name: Deploy NCCR Portal to GitHub Pages
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: NCCRPortal/package-lock.json
+    
+    - name: Install dependencies
+      run: |
+        cd NCCRPortal
+        npm ci
+    
+    - name: Build portal
+      run: |
+        cd NCCRPortal
+        npm run build
+      env:
+        CI: false
+        GENERATE_SOURCEMAP: false
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./NCCRPortal/build
+        cname: bluecarbon-registry.github.io
+
+  deploy-blockchain:
+    name: Deploy Blockchain API to Railway
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Deploy to Railway
+      uses: bervProject/railway-deploy@v1.0.0
+      with:
+        railway_token: ${{ secrets.RAILWAY_TOKEN }}
+        service: "blockchain-api"
+        
+  build-mobile:
+    name: Build Mobile App APK
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '11'
+    
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v2
+    
+    - name: Install dependencies
+      run: |
+        cd BlueCarbonApp
+        npm ci
+    
+    - name: Build Android APK
+      run: |
+        cd BlueCarbonApp/android
+        ./gradlew assembleRelease
+    
+    - name: Upload APK to Release
+      uses: actions/upload-artifact@v3
+      with:
+        name: blue-carbon-app.apk
+        path: BlueCarbonApp/android/app/build/outputs/apk/release/app-release.apk
