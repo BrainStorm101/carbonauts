@@ -1,0 +1,16 @@
+{
+  "name": "blue-carbon-blockchain-api",
+  "version": "1.0.0",
+  "description": "Blue Carbon Registry Blockchain API",
+  "main": "standalone-blockchain-simulator.js",
+  "scripts": {
+    "start": "node standalone-blockchain-simulator.js",
+    "dev": "node standalone-blockchain-simulator.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {},
+  "author": "Blue Carbon Registry Team",
+  "license": "MIT"
+}

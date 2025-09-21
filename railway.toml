@@ -1,0 +1,30 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "never"
+
+[[services]]
+name = "nccr-portal"
+source = "NCCRPortal"
+
+[services.build]
+buildCommand = "npm run build"
+startCommand = "npx serve -s build -l $PORT"
+
+[services.variables]
+NODE_ENV = "production"
+PORT = "3000"
+
+[[services]]
+name = "blockchain-api"
+source = "fabric-samples/test-network"
+
+[services.build]
+startCommand = "node standalone-blockchain-simulator.js"
+
+[services.variables]
+NODE_ENV = "production"
+PORT = "7051"
