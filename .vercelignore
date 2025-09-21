@@ -1,0 +1,9 @@
+BlueCarbonApp/
+fabric-samples/
+.github/
+*.md
+*.bat
+*.sh
+docker-compose*.yml
+railway.toml
+railway.json

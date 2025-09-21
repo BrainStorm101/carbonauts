@@ -1,15 +1,11 @@
 {
-  "name": "blue-carbon-registry",
+  "name": "blue-carbon-nccr-portal",
   "version": 2,
-  "builds": [
-    {
-      "src": "NCCRPortal/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "build"
-      }
-    }
-  ],
+  "buildCommand": "cd NCCRPortal && npm run build",
+  "outputDirectory": "NCCRPortal/build",
+  "installCommand": "cd NCCRPortal && npm install",
+  "framework": null,
+  "functions": {},
   "routes": [
     {
       "src": "/api/(.*)",
@@ -17,7 +13,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "NCCRPortal/$1"
+      "dest": "/index.html"
     }
   ],
   "env": {
