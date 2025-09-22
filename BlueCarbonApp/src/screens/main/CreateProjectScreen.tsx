@@ -125,10 +125,10 @@ const CreateProjectScreen = ({navigation}: any) => {
         includeExtra: true,
       },
       (response) => {
-        if (response.assets) {
+        if (response.assets && response.assets.length > 0) {
           setProjectData(prev => ({
             ...prev,
-            photos: [...prev.photos, ...response.assets],
+            photos: [...prev.photos, ...response.assets!],
           }));
         }
       }
