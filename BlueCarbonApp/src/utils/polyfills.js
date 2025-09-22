@@ -2,6 +2,9 @@
  * Polyfills for React Native compatibility issues
  */
 
+// Import react-native-get-random-values FIRST to ensure proper crypto polyfill
+import 'react-native-get-random-values';
+
 // Completely disable debugging and Chrome connection
 if (typeof global !== 'undefined') {
   // Force disable DEV mode for this session
